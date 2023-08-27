@@ -1,5 +1,6 @@
 import sequelize from '../../Config/sequelize.config.js'
 import { DataTypes, Model } from 'sequelize'
+import Stages from './stage.model.js'
 
 // Skriver ny klasse og udvider den med SQ's Model klasse
 class Seats extends Model {}
@@ -15,7 +16,11 @@ Seats.init({
 	},
 	stage_id: {
 		type: DataTypes.INTEGER,
-		allowNull: false
+		allowNull: false,
+		references: {
+			model: Stages,
+			key: 'id'
+		}
 	},
 	number: {
 		type: DataTypes.INTEGER,

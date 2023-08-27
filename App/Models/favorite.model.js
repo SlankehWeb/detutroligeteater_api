@@ -7,20 +7,31 @@ class Favorites extends Model {}
 // Initialiserer model
 Favorites.init({
 	// Definerer felt egenskaber
-	user_id: {
+	id: {
 		type: DataTypes.INTEGER,
 		autoIncrement: true,
 		allowNull: false,
 		primaryKey: true
+	},	
+	user_id: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
 	},
 	event_id: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 	}
 }, {
+    indexes: [
+        {
+            unique: true,
+            fields: ['user_id', 'event_id'], // Unik kombination af disse to felter
+        }
+    ],	
 	sequelize, // Sequelize objekt
 	modelName: 'favorite', // Model (tabel) navn
 	underscored: true, // Brug underscore istedet for camelcase
+	timestamps: false
 	//freezeTableName: false, // Lås tabelnavne til ental
 	//createdAt: true, // Undlad createdAt felt
 	//updatedAt: true //Undlad updatedAt felt

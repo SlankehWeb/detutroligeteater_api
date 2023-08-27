@@ -28,21 +28,27 @@ class UserController {
 		const qp = QueryParamsHandle(req, 'id, firstname, lastname')
 
 		// Eksekverer sequelize metode med management values
-		const result = await Users.findAll({
-			attributes: qp.attributes,
-			order: [qp.sort_key],
-			limit: qp.limit,
-			include: {
-				model: Orgs,
-				attributes: ['id', 'name']
-			},
-			include: {
-				model: Groups,
-				attributes: ['id', 'name']
-			}
-		})
-		// Udskriver resultat i json format
-		res.json(result)
+		try {
+			const result = await Users.findAll({
+				attributes: qp.attributes,
+				order: [qp.sort_key],
+				limit: qp.limit,
+				include: {
+					model: Orgs,
+					attributes: ['id', 'name']
+				},
+				include: {
+					model: Groups,
+					attributes: ['id', 'name']
+				}
+			})
+			// Udskriver resultat i json format
+			res.json(result)				
+		} catch (error) {
+			res.status(418).send({
+				message: `Could not get user list: ${error}`
+			})									
+		}
 	}
 
 	/**
@@ -53,21 +59,34 @@ class UserController {
 	details = async (req, res) => {
 		// Destructure assignment af id. 
 		const { id } = req.params || 0
-		// Eksekverer sequelize metode med attributter og where clause
-		const result = await Users.findOne({
-			attributes: [
-				'id', 
-				'firstname', 
-				'lastname', 
-				'email', 
-				'is_active', 
-				'createdAt', 
-				'updatedAt'
-			],
-			where: { id: id }
-		})
-		// Udskriver resultat i json format
-		res.json(result)
+
+		if(id) {
+			try {
+				// Eksekverer sequelize metode med attributter og where clause
+				const result = await Users.findOne({
+					attributes: [
+						'id', 
+						'firstname', 
+						'lastname', 
+						'email', 
+						'is_active', 
+						'createdAt', 
+						'updatedAt'
+					],
+					where: { id: id }
+				})
+				// Udskriver resultat i json format
+				res.json(result)				
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not get user details: ${error}`
+				})					
+			}
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 	/**
@@ -81,64 +100,84 @@ class UserController {
 
 		// Tjekker felt data
 		if(firstname && lastname && email && password && org_id) {
-			// Opretter record
-			const model = await Users.create(req.body)
+			
+			try {
+				// Opretter record
+				const model = await Users.create(req.body)
 
-			if(groups) {
-				groups.split(',').map(value => {
-					const values = {
-						group_id: +value,
-						user_id: model.id
-					}
-					UserGroupRel.create(values)
-					
-				})
+				if(groups) {
+					groups.split(',').map(value => {
+						const values = {
+							group_id: +value,
+							user_id: model.id
+						}
+						UserGroupRel.create(values)
+						
+					})
+				}
+				// Sender nyt id som json object
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})				
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not create record: ${error}`
+				})																		
 			}
-
-			// Sender nyt id som json object
-			res.json({ newId: model.id })
 		} else {
-			res.sendStatus(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
 	update = async (req, res) => {
+		const { id } = req.params
 		// Destructure assignment af form data fra request body
-		const { id, firstname, lastname, email, password, org_id, groups } = req.body;
+		const { firstname, lastname, email, password, org_id, groups } = req.body;
 		// Tjekker felt data
 		if(id && firstname && lastname && email && password && org_id) {
-			// Opretter record
-			const model = await Users.update(req.body, {
-				where: { id: id },
-				individualHooks: true
-			})
 
-			if(groups) {
-				groups.split(',').map(value => {
-					const values = {
-						group_id: +value,
-						user_id: model.id
-					}
-					UserGroupRel.create(values)
-					
+			try {
+				// Opretter record
+				const model = await Users.update(req.body, {
+					where: { id: id },
+					individualHooks: true
 				})
-			}			
-			// Sender nyt id som json object
-			res.json({ 
-				msg: 'Record update' 
-			})
+
+				if(groups) {
+					groups.split(',').map(value => {
+						const values = {
+							group_id: +value,
+							user_id: model.id
+						}
+						UserGroupRel.create(values)
+						
+					})
+				}			
+				// Sender nyt id som json object
+				res.json({ 
+					message: 'Record updated' 
+				})
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not update record: ${error}`
+				})					
+			}
 		} else {
-			res.sendStatus(418)
-		}	
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 	update_value = async (req, res) => {
 		// Destructure assignment af id. 
 		const { user_id, field, value } = req.body || 0
 		// Tjekker felt data
-		if(user_id) {
+		if(user_id, field, value) {
 			try {
-
 				const dataObj = {}
 				dataObj[field] = value
 
@@ -146,18 +185,18 @@ class UserController {
 					where: { id: user_id },
 					individualHooks: true
 				})
-				console.log('Antal opdaterede rækker:', model);
-	
-			} catch(err) {
-				console.log(`Error: ${err}`);
+				res.json({ 
+					msg: 'Record update' 
+				})
+			} catch(error) {
+				res.status(418).send({
+					message: `Could not update record: ${error}`
+				})	
 			}
-
-			// Sender nyt id som json object
-			res.json({ 
-				msg: 'Record update' 
-			})
 		} else {
-			res.sendStatus(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}	
 	}
 
@@ -167,15 +206,20 @@ class UserController {
 	 * @param {object} res Response Object
 	 */	
 	remove = async (req, res) => {
-		const { id } = req.body
+		const { id } = req.params
+
 		try {
 			await Users.destroy({ 
 				where: { id: id }
 			})
-			res.sendStatus(200)
+			res.status(200).send({
+				message: `Record deleted`
+			})
 		}
 		catch(err) {
-			res.send(err)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}	
 }

@@ -9,11 +9,17 @@ class GenreController {
 	 * @return {array} Returnerer JSON array
 	 */
 	list = async (req, res) => {
-		const result = await Genres.findAll({
-			attributes: ['id', 'name'],
-		})
-		// Parser resultat som json
-		res.json(result)
+		try {
+			const result = await Genres.findAll({
+				attributes: ['id', 'name'],
+			})
+			// Parser resultat som json
+			res.json(result)				
+		} catch (error) {
+			res.status(418).send({
+				message: `Something went wrong: ${error}`
+			})			
+		}
 	}
 
 	/**
@@ -23,11 +29,25 @@ class GenreController {
 	 * @return {object} Returnerer JSON object med detaljer
 	 */
 	get = async (req, res) => {
-		const result = await Genres.findOne({
-			attributes: ['id', 'name'],
-			where: { id: req.params.id}
-		});
-		res.json(result)
+		const { id } = req.params.id
+
+		if(id) {
+			try {
+				const result = await Genres.findOne({
+					attributes: ['id', 'name'],
+					where: { id: id}
+				});
+				res.json(result)				
+			} catch (error) {
+				res.status(418).send({
+					message: `Something went wrong: ${error}`
+				})								
+			}	
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 	/**
@@ -40,10 +60,21 @@ class GenreController {
 		const { name } = req.body
 
 		if(name) {
-			const model = await Genres.create(req.body)
-			return res.json({newId: model.id})
+			try {
+				const model = await Genres.create(req.body)
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})					
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not create record: ${error}`
+				})					
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}	
 
@@ -57,12 +88,22 @@ class GenreController {
 		const { name } = req.body
 
 		if(name) {
-			const model = await Genres.update(req.body, {
-				where: {id: req.params.id}
-			})
-			return res.json({status: true})
+			try {
+				const model = await Genres.update(req.body, {
+					where: {id: req.params.id}
+				})
+				return res.json({
+					message: `Record updated`
+				})					
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not update record: ${error}`
+				})									
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
@@ -73,14 +114,24 @@ class GenreController {
 	 * @return {boolean} Returnerer true/false
 	 */	
 	remove = async (req, res) => {
-		try {
-			await Genres.destroy({ 
-				where: { id: req.params.id }
+		const { id } = req.params
+
+		if(id) {
+			try {
+				await Genres.destroy({ 
+					where: { id: id }
+				})
+				res.sendStatus(200)
+			}
+			catch(error) {
+				res.status(418).send({
+					message: `Could not delete record: ${error}`
+				})									
+			}	
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
 			})
-			res.sendStatus(200)
-		}
-		catch(err) {
-			res.send(err)
 		}
 	}	
 }

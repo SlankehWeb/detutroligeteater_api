@@ -1,4 +1,9 @@
 import Seats from '../Models/seat.model.js'
+import Stages from '../Models/stage.model.js';
+
+// Relation - one to many
+Stages.hasMany(Seats)
+Seats.belongsTo(Stages)
 
 class SeatController {
 
@@ -9,36 +14,20 @@ class SeatController {
 	 * @return {array} Returnerer JSON array
 	 */
 	list = async (req, res) => {
-		const result = await Seats.findAll({
-			attributes: ['id', 'stage_id', 'row', 'number'],
-		})
-		// Parser resultat som json
-		res.json(result)
-	}
 
-	/**
-	 * Create Metode - opretter ny record
-	 * @param {object} req Request Object
-	 * @param {object} res Response Object
-	 * @return {number} Returnerer nyt id
-	 */
-	 create = async (req, res) => {
-		const { stage_id, rows, cols } = req.body
-
-		if(stage_id && rows && cols) {
-			for(let i = 1; i <= rows; i++) {
-				for(let j = 1; j <= cols; j++) {
-					let obj = {
-						stage_id: stage_id,
-						row: i,
-						number: j
-					}
-					const model = await Seats.create(obj)
+		try {
+			const result = await Seats.findAll({
+				attributes: ['id', 'number'],
+				include: {
+					model: Stages
 				}
-			}
-			return res.json(true)
-		} else {
-			res.send(418)
+			})
+			// Parser resultat som json
+			res.json(result)				
+		} catch (error) {
+			res.status(418).send({
+				message: `Something went wrong: ${error}`
+			})						
 		}
 	}	
 }

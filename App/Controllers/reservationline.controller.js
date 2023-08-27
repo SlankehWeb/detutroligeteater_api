@@ -9,11 +9,17 @@ class ReservationLineController {
 	 * @return {array} Returnerer JSON array
 	 */
 	list = async (req, res) => {
-		const result = await ReservationLines.findAll({
-			attributes: ['seat_id', 'order_id']
-		})
-		// Parser resultat som json
-		res.json(result)
+		try {
+			const result = await ReservationLines.findAll({
+				attributes: ['seat_id', 'order_id']
+			})
+			// Parser resultat som json
+			res.json(result)				
+		} catch (error) {
+			res.status(418).send({
+				message: `Something went wrong: ${error}`
+			})						
+		}
 	}
 
 	/**
@@ -23,11 +29,19 @@ class ReservationLineController {
 	 * @return {object} Returnerer JSON object med detaljer
 	 */
 	get = async (req, res) => {
-		const result = await ReservationLines.findOne({
-			attributes: ['id', 'seat_id', 'order_id'],
-			where: { id: req.params.id}
-		});
-		res.json(result)
+		const { id } = req.params
+
+		try {
+			const result = await ReservationLines.findOne({
+				attributes: ['id', 'seat_id', 'order_id'],
+				where: { id: req.params.id}
+			});
+			res.json(result)				
+		} catch (error) {
+			res.status(418).send({
+				message: `Something went wrong: ${error}`
+			})						
+		}
 	}
 
 	/**
@@ -40,31 +54,23 @@ class ReservationLineController {
 		const { seat_id, order_id } = obj
 
 		if(seat_id && order_id) {
-			const model = await ReservationLines.create(obj)
-			return res.json({newId: model.id})
+			try {
+				const model = await ReservationLines.create(obj)
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})					
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not create record: ${error}`
+				})											
+			}
 		} else {
-			res.send(418)
+			res.status(418).send({
+				message: `Something went wrong: ${error}`
+			})						
 		}
 	}	
-
-	/**
-	 * Update Metode - opdaterer record
-	 * @param {object} req Request Object
-	 * @param {object} res Response Object
-	 * @return {boolean} Returnerer true/false
-	 */	
-	 update = async (req, res) => {
-		const { name } = req.body
-
-		if(name) {
-			const model = await ReservationLines.update(req.body, {
-				where: {id: req.params.id}
-			})
-			return res.json({status: true})
-		} else {
-			res.send(418)
-		}
-	}
 
 	/**
 	 * Delete Metode - sletter record
@@ -73,14 +79,26 @@ class ReservationLineController {
 	 * @return {boolean} Returnerer true/false
 	 */	
 	remove = async (req, res) => {
-		try {
-			await ReservationLines.destroy({ 
-				where: { id: req.params.id }
+		const { id } = req.params
+
+		if(id) {
+			try {
+				await ReservationLines.destroy({ 
+					where: { id: id }
+				})
+				res.status(200).send({
+					message: `Record deleted`
+				})
+			}
+			catch(error) {
+				res.status(418).send({
+					message: `Could not delete record: ${error}`
+				})
+			}	
+		} else {
+			res.status(403).send({
+				message: `Wrong parameter values`
 			})
-			res.sendStatus(200)
-		}
-		catch(err) {
-			res.send(err)
 		}
 	}	
 }

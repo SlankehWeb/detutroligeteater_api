@@ -10,9 +10,9 @@ const user_ctrl = new UserController;
 CoreRouter.get('/users', (req, res) => { user_ctrl.list(req, res) })
 CoreRouter.get('/users/:id([0-9]*)', (req, res) => { user_ctrl.details(req, res) })
 CoreRouter.post('/users', (req, res) => { user_ctrl.create(req, res) })
-CoreRouter.put('/users', (req, res) => { user_ctrl.update(req, res) })
+CoreRouter.put('/users/:id([0-9]*)', (req, res) => { user_ctrl.update(req, res) })
 CoreRouter.patch('/users', (req, res) => { user_ctrl.update_value(req, res) })
-CoreRouter.delete('/users', (req, res) => { user_ctrl.remove(req, res) })
+CoreRouter.delete('/users/:id([0-9]*)', (req, res) => { user_ctrl.remove(req, res) })
 
 // Group Routes
 const group_ctrl = new GroupController;

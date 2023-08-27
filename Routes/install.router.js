@@ -16,7 +16,7 @@ import Favorites from '../App/Models/favorite.model.js'
 import Reservations from '../App/Models/reservation.model.js'
 import ReservationLines from '../App/Models/reservationline.model.js'
 import EventActorRel from '../App/Models/event-actor-rel.model.js'
-import Reviews from '../App/Models/reviews.model.js'
+import Reviews from '../App/Models/review.model.js'
 import SeedController from '../Core/Controllers/seed.controller.js'
 
 const InstallRouter = express.Router()

@@ -26,6 +26,10 @@ Reviews.init({
 		type: DataTypes.INTEGER,
 		allowNull: true
 	},
+	date: {
+		type: DataTypes.DATE,
+		allowNull: false,
+	},	
 	event_id: {
 		type: DataTypes.INTEGER,
 		allowNull: true
@@ -34,7 +38,7 @@ Reviews.init({
 		type: DataTypes.INTEGER,
 		allowNull: true
 	},
-	active: {
+	is_active: {
 		type: DataTypes.BOOLEAN,
 		allowNull: true
 	}

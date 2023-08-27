@@ -1,7 +1,15 @@
-import { Sequelize } from 'sequelize'
-import Stages from '../Models/stage.model.js'
+import Users from '../../Core/Models/user.model.js'
+import Events from '../Models/event.model.js'
+import Reviews from '../Models/review.model.js'
 
-class StageController {
+// Sætter modellers relationelle forhold - een til mange
+Users.hasMany(Reviews)
+Reviews.belongsTo(Users)
+
+Events.hasMany(Reviews)
+Reviews.belongsTo(Events)
+
+class ReviewsController {
 
 	/**
 	 * List Metode - henter alle records
@@ -11,16 +19,26 @@ class StageController {
 	 */
 	list = async (req, res) => {
 		try {
-			const result = await Stages.findAll({
-				attributes: ['id', 'name'],
+			const result = await Reviews.findAll({
+				attributes: ['id', 'subject', 'num_stars', 'created_at'],
+				include: [{
+					model: Users,
+					attributes: ['firstname', 'lastname', 'email']
+				}, {
+					model: Events,
+					attributes: ['title']
+				}],
+				where: { event_id: req.params.event_id }
+	
 			})
 			// Parser resultat som json
-			res.json(result)				
+			res.json(result)			
 		} catch (error) {
 			res.status(418).send({
 				message: `Something went wrong: ${error}`
-			})									
+			})						
 		}
+
 	}
 
 	/**
@@ -29,27 +47,34 @@ class StageController {
 	 * @param {object} res 
 	 * @return {object} Returnerer JSON object med detaljer
 	 */
-	get = async (req, res) => {
+	details = async (req, res) => {
 		const { id } = req.params
 
 		if(id) {
 			try {
-				const result = await Stages.findOne({
-					attributes: ['id', 'name'],
-					where: { id: id}
+				const result = await Reviews.findOne({
+					attributes: ['id', 'subject', 'comment', 'num_stars', 'created_at'],
+					include: [{
+						model: Users,
+						attributes: ['firstname', 'lastname', 'email']
+					}, {
+						model: Events,
+						attributes: ['title']
+					}],
+		
+					where: { id: req.params.id}
 				});
-				res.json(result)				
+				res.json(result)						
 			} catch (error) {
 				res.status(418).send({
 					message: `Something went wrong: ${error}`
-				})										
-			}	
+				})						
+			}
 		} else {
 			res.status(403).send({
 				message: `Wrong parameter values`
 			})					
 		}
-
 	}
 
 	/**
@@ -59,18 +84,19 @@ class StageController {
 	 * @return {number} Returnerer nyt id
 	 */
 	 create = async (req, res) => {
-		const { name } = req.body
-		if(name) {
+		const { subject, comment, date, num_stars, event_id } = req.body
+
+		if(subject && comment && num_stars && event_id) {
 			try {
-				const model = await Stages.create(req.body)
+				const model = await Reviews.create(req.body)
 				return res.json({
 					message: `Record created`,
 					newId: model.id
-				})
+				})					
 			} catch (error) {
 				res.status(418).send({
-					message: `Something went wrong: ${error}`
-				})														
+					message: `Could not create record: ${error}`
+				})									
 			}
 		} else {
 			res.status(403).send({
@@ -86,24 +112,26 @@ class StageController {
 	 * @return {boolean} Returnerer true/false
 	 */	
 	 update = async (req, res) => {
-		const { id } = req.params
 
-		if(id) {
+		const { id, subject, comment, num_stars, is_active } = req.body
+
+		if(id, subject && comment && num_stars && is_active) {
 			try {
-				const model = await Stages.update(req.body, {
-					where: {id: req.params.id}
+				const model = await Reviews.update(req.body, {
+					where: {id: id}
 				})
 				return res.json({
-					message: `Record updated`
-				})
-
+					message: `Record updated`	
+				})					
 			} catch (error) {
 				res.status(418).send({
 					message: `Could not update record: ${error}`
-				})					
+				})				
 			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
@@ -118,24 +146,24 @@ class StageController {
 
 		if(id) {
 			try {
-				await Stages.destroy({ 
+				await Reviews.destroy({ 
 					where: { id: req.params.id }
 				})
-				res.sendStatus({
+				res.status(200).send({
 					message: `Record deleted`
 				})
 			}
 			catch(err) {
 				res.status(418).send({
 					message: `Could not delete record: ${error}`
-				})					
+				})									
 			}	
 		} else {
 			res.status(403).send({
-				message: `Wrong parameter values`
-			})					
+				message: 'Wrong parameter values'
+			})			
 		}
 	}	
 }
 
-export default StageController
+export default ReviewsController

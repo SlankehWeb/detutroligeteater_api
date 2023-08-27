@@ -6,13 +6,18 @@ import sequelize from '../../Config/sequelize.config.js';
 import Orgs from '../../Core/Models/org.model.js';
 import Groups from '../../Core/Models/group.model.js';
 import Users from '../../Core/Models/user.model.js';
+import UserGroupRel from '../../Core/Models/user-group-rel.model.js';
+
 import Stages from '../../App/Models/stage.model.js';
 import Genres from '../../App/Models/genre.model.js';
 import Actors from '../../App/Models/actor.model.js';
 import Events from '../../App/Models/event.model.js';
 import EventActorRel from '../../App/Models/event-actor-rel.model.js';
 import Seats from '../../App/Models/seat.model.js';
-import { log } from 'console';
+import Favorites from '../../App/Models/favorite.model.js';
+import Reviews from '../../App/Models/review.model.js';
+import Reservations from '../../App/Models/reservation.model.js';
+import ReservationLines from '../../App/Models/reservationline.model.js'
 
 /**
  * Controller for Seed Actions
@@ -59,10 +64,30 @@ class SeedController {
 			// Actors
 			const actorData = await this.get_csv_data('actor.csv')
 			const insertedActors = await Actors.bulkCreate(actorData, { transaction });
-		
+
+			// Reviews
+			const reviewData = await this.get_csv_data('review.csv')
+			const insertedReviews = await Reviews.bulkCreate(reviewData, { transaction });
+
+			// Reservation
+			const reservationData = await this.get_csv_data('reservation.csv')
+			const insertedReservation = await Reservations.bulkCreate(reservationData, { transaction });
+
+			// User Groups Relations
+			const userGroupData = await this.get_csv_data('user-group-rel.csv')
+			const insertedUserGroup = await UserGroupRel.bulkCreate(userGroupData, { transaction });
+
+			// ReservationLine
+			const reservationLineData = await this.get_csv_data('reservation-line.csv')
+			const insertedLines = await ReservationLines.bulkCreate(reservationLineData, { transaction });
+			
 			// Actors Events Relations
-			const eventActorData = await this.get_csv_data('event_actor_rel.csv')
+			const eventActorData = await this.get_csv_data('event-actor-rel.csv')
 			const insertedEventActors = await EventActorRel.bulkCreate(eventActorData, { transaction });
+
+			// Favorite Relations
+			const favoriteData = await this.get_csv_data('favorite.csv')
+			const insertedFavorite = await Favorites.bulkCreate(favoriteData, { transaction });
 
 			// Confirm transaction
 			await transaction.commit();

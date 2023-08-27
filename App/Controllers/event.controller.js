@@ -39,22 +39,28 @@ class EventController {
 	list = async (req, res) => {
 		const qp = QueryParamsHandle(req, 'id, title')
 
-		// Kalder SQ model
-		const result = await Events.findAll({
-			order: [qp.sort_key],
-			limit: qp.limit,
-			attributes: qp.attributes,
-			include: [{
-				model: GenreModel,
-				attributes: ['id', 'name']
-			},
-			{
-				model: StageModel,
-				attributes: ['id', 'name']
-			}]
-		})
-		// Parser resultat som json
-		res.json(result)
+		try {
+			// Kalder SQ model
+			const result = await Events.findAll({
+				order: [qp.sort_key],
+				limit: qp.limit,
+				attributes: qp.attributes,
+				include: [{
+					model: GenreModel,
+					attributes: ['id', 'name']
+				},
+				{
+					model: StageModel,
+					attributes: ['id', 'name']
+				}]
+			})
+			// Parser resultat som json
+			res.json(result)
+		} catch(err) {
+			res.status(418).send({
+				message: `Something went wrong: ${err}`
+			})
+		}
 	}
 
 	/**
@@ -64,33 +70,47 @@ class EventController {
 	 * @return {array} Returnerer JSON array
 	 */
 	 search = async(req, res) => {
-		// Sætter resultat med sq metode
-		const result = await Events.findAll({
-			// where clause
-			where: {
-				// Søg på titel
-				title: {
-					[Op.like]: `%${req.query.keyword}%`
-				},
-				// Søg på titel
-				description: {
-					[Op.like]: `%${req.query.keyword}%`
-				} 
-			},
-			// Attributter: array med felter
-			attributes: ['id', 'title', 'image', 'startdate', 'stopdate'],
-			// Inkluderer relationelle data fra artist via id
-			include: [{
-				model: GenreModel,
-				attributes: ['id', 'name']
-			},
-			{
-				model: StageModel,
-				attributes: ['id', 'name']
-			}]
-		})
-		// Parser result som json
-		res.json(result)
+		const { keyword } = req.params
+
+		if(keyword) {
+			try {
+				// Sætter resultat med sq metode
+				const result = await Events.findAll({
+					// where clause
+					where: {
+						// Søg på titel
+						title: {
+							[Op.like]: `%${req.params.keyword}%`
+						},
+						// Søg på titel
+						description: {
+							[Op.like]: `%${req.params.keyword}%`
+						} 
+					},
+					// Attributter: array med felter
+					attributes: ['id', 'title', 'image', 'startdate', 'stopdate'],
+					// Inkluderer relationelle data fra artist via id
+					include: [{
+						model: GenreModel,
+						attributes: ['id', 'name']
+					},
+					{
+						model: StageModel,
+						attributes: ['id', 'name']
+					}]
+				})
+				// Parser result som json
+				res.json(result)
+			} catch (err) {
+				res.status(403).send({
+					message: `Something went wrong: ${err}`
+				})					
+			}			
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 
@@ -100,25 +120,40 @@ class EventController {
 	 * @param {object} res 
 	 * @return {object} Returnerer JSON object med detaljer
 	 */
-	get = async (req, res) => {
-		// Sætter resultat efter sq metode
-		const result = await Events.findOne({
-			attributes: [
-				'id', 'title', 'description', 'image', 'startdate', 'stopdate', 'duration_minutes',
-				'price', 'created_at'
-			],
-			include: [{
-				model: GenreModel,
-				attributes: ['id', 'name']
-			}, {
-				model: StageModel,
-				attributes: ['id', 'name']
-			}],
-			// Where clause
-			where: { id: req.params.id}
-		});
-		// Parser resultat som json
-		res.json(result)
+	details = async (req, res) => {
+		const { id } = req.params
+
+		if(id) {
+			// Sætter resultat efter sq metode
+			try {
+				const result = await Events.findOne({
+					attributes: [
+						'id', 'title', 'description', 'image', 'startdate', 'stopdate', 'duration_minutes',
+						'price', 'created_at'
+					],
+					include: [{
+						model: GenreModel,
+						attributes: ['id', 'name']
+					}, {
+						model: StageModel,
+						attributes: ['id', 'name']
+					}],
+					// Where clause
+					where: { id: req.params.id}
+				});
+				// Parser resultat som json
+				res.json(result)
+					
+			} catch (error) {
+				res.status(403).send({
+					message: `Something went wrong: ${err}`
+				})					
+			}
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 
@@ -134,10 +169,21 @@ class EventController {
 				price, genre_id, stage_id } = req.body
 
 		if(title && description && image && startdate && stopdate && genre_id && stage_id) {
-			const model = await Events.create(req.body)
-			return res.json({newId: model.id})
+			try {
+				const model = await Events.create(req.body)
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})					
+			} catch (error) {
+				res.status(403).send({
+					message: `Could not create record: ${err}`
+				})									
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
@@ -147,16 +193,27 @@ class EventController {
 	 * @param {object} res Response Object
 	 */	
 	 update = async (req, res) => {
+		const { id } = req.params
 		const { title, description, image, startdate, stopdate, duration_minutes, 
 			price, genre_id, stage_id } = req.body
 
-		if(title && description && image && startdate && stopdate) {
-			const model = await Events.update(req.body, {
-				where: {id: req.params.id}
-			})
-			return res.json({status: true})
+		if(id && title && description && image && startdate && stopdate) {
+			try {
+				const model = await Events.update(req.body, {
+					where: {id: id}
+				})
+				return res.json({
+					message: `Record updated`
+				})					
+			} catch (error) {
+				res.status(403).send({
+					message: `Could not update record: ${err}`
+				})					
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
@@ -166,14 +223,24 @@ class EventController {
 	 * @param {object} res Response Object
 	 */	
 	remove = async (req, res) => {
-		try {
-			await Events.destroy({ 
-				where: { id: req.params.id }
+		const { id } = req.params.id
+
+		if(id) {
+			try {
+				await Events.destroy({ 
+					where: { id: id }
+				})
+				res.sendStatus(200)
+			}
+			catch(err) {
+				res.status(418).send({
+					message: `Could not delete record: ${err}`
+				})
+			}	
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
 			})
-			res.sendStatus(200)
-		}
-		catch(err) {
-			res.send(err)
 		}
 	}	
 }

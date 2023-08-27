@@ -1,3 +1,4 @@
+import { QueryParamsHandle } from '../../Middleware/helpers.js'
 import Orgs from '../Models/org.model.js'
 
 /**
@@ -10,25 +11,23 @@ class OrgController {
 	 * @param {Object} req Express Request Object
 	 * @param {Object} res Express Response Object
 	 */
-	list = async (req, res) => {
-		// Destructure Assignment - optional list management
-		let { sortkey, sortdir, limit, attributes } = req.query
-		// Sætter array til sort og retning
-		const order = [sortkey ? sortkey : 'id']
-		order.push(sortdir || 'ASC')
-		// Sætter limit antal
-		limit = parseInt(limit) || 1000
-		// Sætter attributter (table felter)
-		const attr = attributes ? attributes.split(',') : new Array('id', 'name')
+	list = async (req, res) => {		
+		const qp = QueryParamsHandle(req, 'id, name')
 
-		// Eksekverer sequelize metode med management values
-		const result = await Orgs.findAll({
-			attributes: attr,
-			order: [order],
-			limit: limit
-		})
-		// Udskriver resultat i json format
-		res.json(result)
+		try {
+			const result = await Orgs.findAll({
+				attributes: qp.attributes,
+				order: [qp.sort_key],
+				limit: qp.limit
+			})
+			// Udskriver resultat i json format
+			res.json(result)								
+		} catch (error) {
+			res.status(418).send({
+				message: `Could not get org list: ${error}`
+			})												
+		}
+
 	}
 
 	/**
@@ -39,13 +38,27 @@ class OrgController {
 	details = async (req, res) => {
 		// Destructure assignment af id. 
 		const { id } = req.params || 0
-		// Eksekverer sequelize metode med attributter og where clause
-		const result = await Orgs.findOne({
-			attributes: ['id', 'name', 'address', 'zipcode', 'city', 'country', 'createdAt', 'updatedAt'],
-			where: { id: id }
-		})
-		// Udskriver resultat i json format
-		res.json(result)
+
+		if(id) {
+			try {
+				// Eksekverer sequelize metode med attributter og where clause
+				const result = await Orgs.findOne({
+					attributes: ['id', 'name', 'address', 'zipcode', 'city', 'country', 'createdAt', 'updatedAt'],
+					where: { id: id }
+				})
+				// Udskriver resultat i json format
+				res.json(result)
+				
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not get org details: ${error}`
+				})																	
+			}
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
 	}
 
 	/**
@@ -58,12 +71,27 @@ class OrgController {
 		const { name, address, zipcode, city, country } = req.body;
 		// Tjekker felt data
 		if(name && address && zipcode && city) {
+			try {
+				// Opretter record
+				const model = await Orgs.create(req.body)
+				// Sender nyt id som json object
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not create record: ${error}`
+				})																					
+			}
 			// Opretter record
 			const model = await Orgs.create(req.body)
 			// Sender nyt id som json object
 			res.json({ newId: model.id })
 		} else {
-			res.sendStatus(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}
 	}
 
@@ -77,19 +105,29 @@ class OrgController {
 		const { id } = req.params || 0
 		// Destructure assignment af form data fra request body
 		const { name, address, zipcode, city, country } = req.body;
+
 		// Tjekker felt data
 		if(id && name && address && zipcode && city) {
-			// Opretter record
-			const model = await Orgs.update(req.body, {
-				where: { id: id },
-				individualHooks: true
-			})
-			// Sender nyt id som json object
-			res.json({ 
-				msg: 'Record update' 
-			})
+
+			try {
+				// Opretter record
+				const model = await Orgs.update(req.body, {
+					where: { id: id },
+					individualHooks: true
+				})
+				// Sender nyt id som json object
+				return res.json({
+					message: `Record updated`
+				})				
+			} catch (error) {
+				res.status(418).send({
+					message: `Could not update record: ${error}`
+				})																					
+			}
 		} else {
-			res.sendStatus(418)
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
 		}	
 	}
 
@@ -99,14 +137,27 @@ class OrgController {
 	 * @param {object} res Response Object
 	 */	
 	remove = async (req, res) => {
-		try {
-			await Orgs.destroy({ 
-				where: { id: req.params.id }
-			})
-			res.sendStatus(200)
-		}
-		catch(err) {
-			res.send(err)
+		const { id } = re.params
+		
+		if(id) {
+			try {
+				await Orgs.destroy({ 
+					where: { id: req.params.id }
+				})
+				return res.status(200).send({
+					message: `Record deleted`
+				})
+			}
+			catch(err) {
+				res.status(418).send({
+					message: `Could not delete record: ${error}`
+				})																	
+
+			}	
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})			
 		}
 	}		
 }

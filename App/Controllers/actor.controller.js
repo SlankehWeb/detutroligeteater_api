@@ -10,26 +10,42 @@ class ActorController {
 	list = async (req, res) => {
 		const qp = QueryParamsHandle(req, 'id, name')
 
-		const result = await Actors.findAll({
-			// Definerer array med felter
-			order: [qp.sort_key],			
-			limit: qp.limit,
-			attributes: qp.attributes
-		})
-		// Parser resultat som json
-		res.json(result)
+		try {
+			const result = await Actors.findAll({
+				// Definerer array med felter
+				order: [qp.sort_key],			
+				limit: qp.limit,
+				attributes: qp.attributes
+			})
+			// Parser resultat som json
+			res.json(result)	
+		} catch(err) {
+			res.status(418).send({
+				message: `Something went wrong: ${err}`
+			})
+		}
 	}
 
 	// Metode get - henter record ud fra id
-	get = async (req, res) => {
-		// Sætter resultat efter sq metode
-		const result = await Actors.findOne({
-			// Where clause
-			where: { id: req.params.id},
-			attributes: ['id', 'name', 'description', 'image'],
-		});
-		// Parser resultat som json
-		res.json(result)
+	details = async (req, res) => {
+		const { id } = req.params
+
+		if(id) {
+			try {
+				// Sætter resultat efter sq metode
+				const result = await Actors.findOne({
+					// Where clause
+					where: { id: id},
+					attributes: ['id', 'name', 'description', 'image'],
+				});
+				// Parser resultat som json
+				res.json(result)
+			} catch(err) {
+				res.status(418).send({
+					message: `Something went wrong: ${err}`
+				})
+			}
+		}
 	}
 
 	/**
@@ -42,10 +58,21 @@ class ActorController {
 		const { name, description, image } = req.body
 
 		if(name && description && image) {
-			const model = await Actors.create(req.body)
-			return res.json({newId: model.id})
+			try{
+				const model = await Actors.create(req.body)
+				return res.json({
+					message: `Record created`,
+					newId: model.id
+				})	
+			} catch (err) {
+				res.status(418).send({
+					message: `Could not create record: ${err}`
+				})
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: "Wrong parameter values"
+			})
 		}
 	}
 
@@ -55,15 +82,28 @@ class ActorController {
 	 * @param {object} res Response Object
 	 */	
 	 update = async (req, res) => {
+		const { id } = req.params.id
 		const { name, description, image } = req.body
 
-		if(name && description && image) {
-			const model = await Actors.update(req.body, {
-				where: {id: req.params.id}
-			})
-			return res.json({status: true})
+		if(id && name && description && image) {
+			try {
+				const model = await Actors.update(req.body, {
+					where: {id: id}
+				})	
+				return res.json({
+					message: `Record updated`
+				})
+			} catch (err) {
+				console.error(err);
+				res.status(418).send({
+					message: "Could not create record"
+				})
+
+			}
 		} else {
-			res.send(418)
+			res.status(403).send({
+				message: "Wrong parameter values"
+			})
 		}
 	}
 
@@ -73,14 +113,26 @@ class ActorController {
 	 * @param {object} res Response Object
 	 */	
 	remove = async (req, res) => {
-		try {
-			await Actors.destroy({ 
-				where: { id: req.params.id }
+		const { id } = req.params.id
+
+		if(id) {
+			try {
+				await Actors.destroy({ 
+					where: { id: req.params.id }
+				})
+				res.status(200).send({
+					message: "Actor deleted"
+				})
+			}
+			catch(err) {
+				res.status(418).send({
+					message: `Could not create record: ${err}`
+				})
+			}	
+		} else {
+			res.status(403).send({
+				message: "Wrong parameter values"
 			})
-			res.sendStatus(200)
-		}
-		catch(err) {
-			res.send(err)
 		}
 	}	
 }

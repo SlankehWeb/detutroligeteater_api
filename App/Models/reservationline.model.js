@@ -1,5 +1,6 @@
 import sequelize from '../../Config/sequelize.config.js'
 import { DataTypes, Model } from 'sequelize'
+import Reservations from './reservation.model.js'
 
 // Skriver ny klasse og udvider den med SQ's Model klasse
 class ReservationLines extends Model {}
@@ -13,9 +14,13 @@ ReservationLines.init({
 		allowNull: false,
 		primaryKey: true
 	},
-	order_id: {
+	reservation_id: {
 		type: DataTypes.INTEGER,
-		allowNull: false
+		allowNull: false,
+		references: {
+			model: Reservations,
+			key: 'id'
+		}
 	},
 	seat_id: {
 		type: DataTypes.INTEGER,
