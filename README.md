@@ -1,16 +1,29 @@
 # Overlook API
-API'et er bygget i NodeJS, Express og Sequelize. Det er bygget op mod en MySQL database som datakilde. I mappen *Data* finder du et mysql dump af databasen som du kan køre i jeres lokale database. 
+API'et er bygget i NodeJS, Express og Sequelize. Det er bygget op mod en MySQL database som datakilde.
 
-Herunder ligger et link til en Postman dokumentation sim giver et overblik over de forskellige endpoints i API'et:
-https://documenter.getpostman.com/view/6540576/2s9Y5SXRwU
+## Struktur
+API'ets modeller og controllers  er delt i mapperne *App* og *Core*. Under Core mappen finder du faste elementer som brugere, brugergrupper og organisationer. I App mappen ligger alle de filer som hører til den specifikke løsning - det vil sige arrangementer, skuespiller, nyheder, reservationer osv.
+
+Alle routes ligger fordelt på filerne *app*, *core* og *install* i mappen *Routes*.
+## Postman
+
+Der ligger en Postman dokumentation på nedenstående link som giver et overblik over de forskellige endpoints i API'et og hvordan de skal kaldes:
+https://documenter.getpostman.com/view/6540576/2s9Y5cugYY
+
+Du skal selv oprette en database og indtaste dine bruger oplysninger til din denne i filen `.env`. Når du har gjort det kan du installere alle data ved at gå ind i mappen *System => Install* i Postman og kalde endpointet *Install datamodels*. 
+
+> OBS! Ovenstående kommando vil installere alle tabeller og data. Pas derfor  på med at gøre dette hvis du har tilføjet ændringer i tabeller eller data. 
+
+## Modeller & Data
+Modeller og data er relateret. Det betyder at en model i mappen Models indlæser data fra en csv fil i mappen Data når der køres en *Install datamodels*. 
+
+Derfor skal du huske at tilpasse datafilerne hvis du laver ændringer til datastrukturen i en af model filerne.  
 
 ## .env
-Sørg for at indtaste dine bruger oplysninger til din database i filen `.env`.
-
-Der kan du også angive portnummer og levetid i sekunder for dine tokens. Standard portnummer er 4000.
+Der kan du også angive portnummer og levetid i sekunder for dine tokens. Standard portnummer er 3000.
 
 ## Billeder
-I mappen `images` finder du alle billeder til sitet. 
+I mappen `Assets/Images` finder du alle billeder til sitet. 
 
 Disse kan kopieres til din frontend løsning.
 
