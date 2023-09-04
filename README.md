@@ -1,8 +1,7 @@
 # Overlook API
-API'et er bygget i NodeJS, Express og Sequelize. Det er bygget op mod en MySQL database som datakilde.
-
-## Struktur
-API'ets modeller og controllers  er delt i mapperne *App* og *Core*. Under Core mappen finder du faste elementer som brugere, brugergrupper og organisationer. I App mappen ligger alle de filer som hører til den specifikke løsning - det vil sige arrangementer, skuespiller, nyheder, reservationer osv.
+API'et er bygget i NodeJS, Express og Sequelize med MySQL database som datakilde.
+## Overordnet filstruktur
+API'ets modeller og controllers  er delt i mapperne *App* og *Core*. I Core mappen finder du faste elementer som brugere, brugergrupper og organisationer. I App mappen ligger alle de filer som hører til den specifikke løsning - det vil sige arrangementer, skuespiller, nyheder, reservationer osv.
 
 Alle routes ligger fordelt på filerne *app*, *core* og *install* i mappen *Routes*.
 ## Postman
@@ -12,7 +11,7 @@ https://documenter.getpostman.com/view/6540576/2s9Y5cugYY
 
 Du skal selv oprette en database og indtaste dine bruger oplysninger til din denne i filen `.env`. Når du har gjort det kan du installere alle data ved at gå ind i mappen *System => Install* i Postman og kalde endpointet *Install datamodels*. 
 
-> OBS! Ovenstående kommando vil installere alle tabeller og data. Pas derfor  på med at gøre dette hvis du har tilføjet ændringer i tabeller eller data. 
+> OBS! Ovenstående kommando vil geninstallere alle tabeller og data og dermed slette de eksisterende. 
 
 ## Modeller & Data
 Modeller og data er relateret. Det betyder at en model i mappen Models indlæser data fra en csv fil i mappen Data når der køres en *Install datamodels*. 
