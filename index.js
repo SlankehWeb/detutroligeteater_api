@@ -33,7 +33,7 @@ const currentPath = fileURLToPath(currentUrl);
 const currentDir = path.dirname(currentPath);
 
 // Define a route to serve static images
-app.use('/images', express.static(path.join(currentDir, 'images')));
+app.use('/Assets', express.static(path.join(currentDir, 'Assets')));
 
 app.use(InstallRouter)
 app.use(CoreRouter)

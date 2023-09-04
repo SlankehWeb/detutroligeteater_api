@@ -14,7 +14,7 @@ export const QueryParamsHandle = (req, default_attr) => {
 		attributes: attr.split(',').map(str => str.trim())
 	}
 	query_params.sort_key.push(req.query.dir || 'ASC')
-
+	console.log(query_params);
 	return query_params
 }
 
