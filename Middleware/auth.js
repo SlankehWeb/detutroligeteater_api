@@ -85,6 +85,7 @@ const Authenticate = async (req, res) => {
           // Returnerer access_token til requester
           return res.json({
             access_token: access_token,
+            user_id: data.id,
             created: Date(),
           })
         } else {
