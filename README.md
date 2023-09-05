@@ -19,8 +19,29 @@ Modeller og data er relateret. Det betyder at en model i mappen Models indlæser
 Derfor skal du huske at tilpasse datafilerne hvis du laver ændringer til datastrukturen i en af model filerne.  
 
 ## .env
-Der kan du også angive portnummer og levetid i sekunder for dine tokens. Standard portnummer er 3000.
+Husk at oprette en .env fil i roden af dit repository og kopiere følgende ind i filen. Husk at tilrette dine egne database credentials. 
 
+NB: Default bruger password er også genreret med secret string fra nedenstående kode.
+```
+# Port Number
+PORT = 3000
+
+# Database Credentials
+DBHOST = localhost
+DBNAME = detutroligeteater
+DBUSER = root
+DBPASSWD = password
+
+# Token keys ############
+
+# Token Access Key
+TOKEN_ACCESS_KEY = myprivatekey # SECRET STRING 
+TOKEN_ACCESS_EXPIRATION_SECS = 3600 # NUMBER OF EXPIRATION SECONDS: 1 HOUR
+
+# Token Refresh Key
+TOKEN_REFRESH_KEY = myprivaterefreshkey # SECRET STRING 
+TOKEN_REFRESH_EXPIRATION_SECS = 86400 # NUMBER OF EXPIRATION SECONDS: 1 DAY
+```
 ## Billeder
 I mappen `Assets/Images` finder du alle billeder til sitet. 
 
