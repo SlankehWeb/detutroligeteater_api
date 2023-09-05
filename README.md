@@ -27,10 +27,10 @@ NB: Default bruger password er også genreret med secret string fra nedenståend
 PORT = 3000
 
 # Database Credentials
-DBHOST = localhost
-DBNAME = detutroligeteater
-DBUSER = root
-DBPASSWD = password
+DBHOST = [localhost]
+DBNAME = [database_name]
+DBUSER = [database_user]
+DBPASSWD = [database_password]
 
 # Token keys ############
 
