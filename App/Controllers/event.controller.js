@@ -4,6 +4,8 @@ import GenreModel from '../Models/genre.model.js';
 import Actors from '../Models/actor.model.js';
 import StageModel from '../Models/stage.model.js';
 import { QueryParamsHandle } from '../../Middleware/helpers.js';
+import Stages from '../Models/stage.model.js';
+import Genres from '../Models/genre.model.js';
 
 // Kalder sq Operator til search clause
 const Op = Sequelize.Op;
@@ -17,16 +19,8 @@ StageModel.hasMany(Events)
 Events.belongsTo(StageModel)
 
 // Sætter modellers relationelle forhold - mange til mange
-Actors.belongsToMany(Events, {
-through: 'event_actor_rel',
-	as: 'events',
-	foreignKey: 'actor_id'
-})
-Events.belongsToMany(Actors, {
-	through: 'event_actor_rel',
-	as: 'actors',
-	foreignKey: 'event_id'
-})
+Actors.belongsToMany(Events, { through: 'event_actor_rel' })
+Events.belongsToMany(Actors, { through: 'event_actor_rel' })
 
 class EventController {
 
@@ -91,11 +85,15 @@ class EventController {
 					attributes: ['id', 'title', 'image', 'startdate', 'stopdate'],
 					// Inkluderer relationelle data fra artist via id
 					include: [{
-						model: GenreModel,
+						model: Genres,
 						attributes: ['id', 'name']
 					},
 					{
-						model: StageModel,
+						model: Stages,
+						attributes: ['id', 'name']
+					},
+					{
+						model: Actors,
 						attributes: ['id', 'name']
 					}]
 				})
@@ -132,10 +130,13 @@ class EventController {
 						'price', 'created_at'
 					],
 					include: [{
-						model: GenreModel,
+						model: Genres,
 						attributes: ['id', 'name']
 					}, {
-						model: StageModel,
+						model: Stages,
+						attributes: ['id', 'name']
+					}, {
+						model: Actors,
 						attributes: ['id', 'name']
 					}],
 					// Where clause
@@ -146,7 +147,7 @@ class EventController {
 					
 			} catch (error) {
 				res.status(403).send({
-					message: `Something went wrong: ${err}`
+					message: `Something went wrong: ${error}`
 				})					
 			}
 		} else {
