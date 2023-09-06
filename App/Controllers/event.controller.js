@@ -91,10 +91,6 @@ class EventController {
 					{
 						model: Stages,
 						attributes: ['id', 'name']
-					},
-					{
-						model: Actors,
-						attributes: ['id', 'name']
 					}]
 				})
 				// Parser result som json
