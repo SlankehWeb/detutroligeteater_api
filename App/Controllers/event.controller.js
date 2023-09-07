@@ -137,7 +137,7 @@ class EventController {
 						attributes: ['id', 'name']
 					}, {
 						model: Actors,
-						attributes: ['id', 'name']
+						attributes: ['id', 'name', 'image']
 					}],
 					// Where clause
 					where: { id: req.params.id}
