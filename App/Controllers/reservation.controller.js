@@ -29,14 +29,21 @@ class ReservationController {
 	 * @return {array} Returnerer JSON array
 	 */
 	 list = async (req, res) => {
+		const { event_id } = req.query
 		const qp = QueryParamsHandle(req, 'id, firstname')
 
+		const dataObj = {
+			order: [qp.sort_key],
+			limit: qp.limit,
+			attributes: qp.attributes
+		}
+
+		if(event_id) {
+			dataObj.where = { event_id: event_id }
+		}
+
 		try {
-			const result = await Reservations.findAll({
-				order: [qp.sort_key],
-				limit: qp.limit,
-				attributes: qp.attributes
-			})
+			const result = await Reservations.findAll(dataObj)
 			// Parser resultat som json
 			res.json(result)				
 		} catch (error) {
@@ -45,6 +52,39 @@ class ReservationController {
 			})						
 		}
 	}
+
+	/**
+	 * List By Event Metode - henter alle records ud fra event_id
+	 * @param {object} req 
+	 * @param {object} res 
+	 * @return {array} Returnerer JSON array
+	 */
+
+	list_by_event = async (req, res) => {
+		const { id } = req.query
+		const qp = QueryParamsHandle(req, 'id, firstname')
+
+		if(id) {
+			try {
+				const result = await Reservations.findAll({
+					order: [qp.sort_key],
+					limit: qp.limit,
+					attributes: qp.attributes,
+					where: { event_id: id }
+				})
+				// Parser resultat som json
+				res.json(result)				
+			} catch (error) {
+				res.status(418).send({
+					message: `Something went wrong: ${error}`
+				})						
+			}	
+		} else {
+			res.status(403).send({
+				message: 'Wrong parameter values'
+			})
+		}
+	}	
 
 	/**
 	 * GET Metode henter record ud fra id
