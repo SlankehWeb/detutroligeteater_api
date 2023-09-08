@@ -1,6 +1,7 @@
 import Users from '../../Core/Models/user.model.js'
 import Events from '../Models/event.model.js'
 import Reviews from '../Models/review.model.js'
+import { getUserFromToken } from '../../Middleware/auth.js'
 
 // Sætter modellers relationelle forhold - een til mange
 Users.hasMany(Reviews)
