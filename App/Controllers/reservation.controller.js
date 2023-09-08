@@ -66,7 +66,7 @@ class ReservationController {
 			try {
 				// Sætter resultat efter sq metode
 				const result = await Reservations.findOne({
-					attributes: ['firstname', 'lastname', 'address', 'zipcode', 'city', 
+					attributes: ['id','firstname', 'lastname', 'address', 'zipcode', 'city', 
 									'email', 'created_at'
 					],
 					include: [
