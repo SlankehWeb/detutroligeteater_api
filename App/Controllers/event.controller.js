@@ -72,14 +72,19 @@ class EventController {
 				const result = await Events.findAll({
 					// where clause
 					where: {
+						[Op.or]: [
 						// Søg på titel
-						title: {
-							[Op.like]: `%${req.params.keyword}%`
+						{
+							title: {
+								[Op.like]: `%${req.params.keyword}%`
+							}
 						},
-						// Søg på titel
-						description: {
-							[Op.like]: `%${req.params.keyword}%`
-						} 
+						{
+							description: {
+								[Op.like]: `%${req.params.keyword}%`
+							} 
+	
+						}]
 					},
 					// Attributter: array med felter
 					attributes: ['id', 'title', 'image', 'startdate', 'stopdate'],
