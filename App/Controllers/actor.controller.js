@@ -8,7 +8,7 @@ const Op = Sequelize.Op;
 class ActorController {
 	// Metode list - henter alle records
 	list = async (req, res) => {
-		const qp = QueryParamsHandle(req, 'id, name')
+		const qp = QueryParamsHandle(req, 'id, name, description, image')
 
 		try {
 			const result = await Actors.findAll({
