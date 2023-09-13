@@ -85,7 +85,11 @@ const Authenticate = async (req, res) => {
           // Returnerer access_token til requester
           return res.json({
             access_token: access_token,
-            user_id: data.id,
+            user: {
+              id: `${data.id}`,
+              firstname: `${data.firstname}`,
+              lastname: `${data.lastname}`
+            },
             created: Date(),
           })
         } else {
@@ -156,9 +160,12 @@ const Authorize = async (req, res, next) => {
                   if (err) {
                     switch (err.message) {
                       case "jwt expired":
+                      case "jwt malformed":
                         // Returerner besked om at refresh_token er udløbet
                         // Betyder at bruger skal logge ind igen
-                        res.json({ message: "Refresh token expired. Please login again." })
+                        res.status(400).send({ 
+                          message: "Refresh token malformed or expired. Please login again." 
+                        })
                         break
                       case "invalide token":
                         // Returnerer statuskode (400: Bad Request)
