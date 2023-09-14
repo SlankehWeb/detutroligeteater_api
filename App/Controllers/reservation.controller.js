@@ -29,14 +29,21 @@ class ReservationController {
 	 * @return {array} Returnerer JSON array
 	 */
 	 list = async (req, res) => {
+		const { event_id } = req.query
 		const qp = QueryParamsHandle(req, 'id, firstname')
 
+		const dataObj = {
+			order: [qp.sort_key],
+			limit: qp.limit,
+			attributes: qp.attributes
+		}
+
+		if(event_id) {
+			dataObj.where = { event_id: event_id }
+		}
+
 		try {
-			const result = await Reservations.findAll({
-				order: [qp.sort_key],
-				limit: qp.limit,
-				attributes: qp.attributes
-			})
+			const result = await Reservations.findAll(dataObj)
 			// Parser resultat som json
 			res.json(result)				
 		} catch (error) {
@@ -59,7 +66,7 @@ class ReservationController {
 			try {
 				// Sætter resultat efter sq metode
 				const result = await Reservations.findOne({
-					attributes: ['firstname', 'lastname', 'address', 'zipcode', 'city', 
+					attributes: ['id','firstname', 'lastname', 'address', 'zipcode', 'city', 
 									'email', 'created_at'
 					],
 					include: [
@@ -103,10 +110,10 @@ class ReservationController {
 	 * @return {number} Returnerer nyt id
 	 */
 	 create = async (req, res) => {
-		const { firstname, lastname, address, zipcode, city, seats } = req.body
+		const { event_id, firstname, lastname, address, zipcode, city, seats } = req.body
 		const lines = []
 
-		if(firstname && lastname && address && zipcode && city) {
+		if(event_id, firstname && lastname && address && zipcode && city) {
 
 			try {
 				const model = await Reservations.create(req.body)

@@ -72,14 +72,19 @@ class EventController {
 				const result = await Events.findAll({
 					// where clause
 					where: {
+						[Op.or]: [
 						// Søg på titel
-						title: {
-							[Op.like]: `%${req.params.keyword}%`
+						{
+							title: {
+								[Op.like]: `%${req.params.keyword}%`
+							}
 						},
-						// Søg på titel
-						description: {
-							[Op.like]: `%${req.params.keyword}%`
-						} 
+						{
+							description: {
+								[Op.like]: `%${req.params.keyword}%`
+							} 
+	
+						}]
 					},
 					// Attributter: array med felter
 					attributes: ['id', 'title', 'image', 'startdate', 'stopdate'],
@@ -90,10 +95,6 @@ class EventController {
 					},
 					{
 						model: Stages,
-						attributes: ['id', 'name']
-					},
-					{
-						model: Actors,
 						attributes: ['id', 'name']
 					}]
 				})
@@ -137,7 +138,7 @@ class EventController {
 						attributes: ['id', 'name']
 					}, {
 						model: Actors,
-						attributes: ['id', 'name', 'image']
+						attributes: ['id', 'name', 'description', 'image']
 					}],
 					// Where clause
 					where: { id: req.params.id}

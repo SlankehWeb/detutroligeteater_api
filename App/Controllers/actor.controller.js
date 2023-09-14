@@ -6,9 +6,14 @@ import { QueryParamsHandle } from '../../Middleware/helpers.js'
 const Op = Sequelize.Op;
 
 class ActorController {
-	// Metode list - henter alle records
+
+	/**
+	 * Metode List - henter alle skuespillere
+	 * @param {object} req 
+	 * @param {object} res 
+	 */
 	list = async (req, res) => {
-		const qp = QueryParamsHandle(req, 'id, name')
+		const qp = QueryParamsHandle(req, 'id, name, description, image')
 
 		try {
 			const result = await Actors.findAll({

@@ -17,12 +17,3 @@ export const QueryParamsHandle = (req, default_attr) => {
 	console.log(query_params);
 	return query_params
 }
-
-export const JsonResponder = (strCustomMessage, errorMessage, statusCode) => {
-	return { 
-		status: statusCode || 200,
-		message: strCustomMessage,
-		details: errorMessage || `-`
-	}
-	
-}
