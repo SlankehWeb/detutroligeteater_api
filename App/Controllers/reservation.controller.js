@@ -110,10 +110,10 @@ class ReservationController {
 	 * @return {number} Returnerer nyt id
 	 */
 	 create = async (req, res) => {
-		const { firstname, lastname, address, zipcode, city, seats } = req.body
+		const { event_id, firstname, lastname, address, zipcode, city, seats } = req.body
 		const lines = []
 
-		if(firstname && lastname && address && zipcode && city) {
+		if(event_id, firstname && lastname && address && zipcode && city) {
 
 			try {
 				const model = await Reservations.create(req.body)
